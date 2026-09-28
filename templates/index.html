@@ -1,3 +1,53 @@
-</h1> IF YOU CAN SEE THIS, IT MEANS SITE IS WORKING
+<!DOCTYPE html>
+<html>
+<head>
+    <title>assets</title>
 
-<a href="{{ url_for('about') }}" alt="about"> about </a>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 700px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>assets</h1>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Age</th>
+        </tr>
+
+        {% for asset in asset %}
+        <tr>
+            <td>{{ asset.id }}</td>
+            <td>{{ asset.name }}</td>
+            <td>{{ asset.email }}</td>
+            <td>{{ asset.age }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</body>
+</html>
