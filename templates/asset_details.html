@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ asset.hostname }} · Cloud Asset Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="page-shell details-shell">
+        <header class="topbar">
+            <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">C</span> Cloud Asset Manager</a>
+            <a class="text-link" href="{{ url_for('index') }}">← Back to register</a>
+        </header>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}<div class="flash-list">{% for category, message in messages %}<p class="flash flash-{{ category }}">{{ message }}</p>{% endfor %}</div>{% endif %}
+        {% endwith %}
+        <section class="detail-heading">
+            <div>
+                <p class="eyebrow">{{ asset.asset_tag }} · {{ asset.asset_type }}</p>
+                <h1>{{ asset.hostname }}</h1>
+                <p class="subheading">{{ asset.operating_system }} · {{ asset.ip_address }}</p>
+            </div>
+            <div class="detail-actions">
+                <span class="status status-{{ asset.status|lower|replace(' ', '-') }}">{{ asset.status }}</span>
+                <a class="button button-secondary" href="{{ url_for('edit_asset', asset_key=asset.asset_key) }}">Edit asset</a>
+            </div>
+        </section>
+        <section class="details-grid" aria-label="Asset information">
+            <div class="detail-group">
+                <h2>Specifications</h2>
+                <dl><div><dt>Operating system</dt><dd>{{ asset.operating_system }}</dd></div><div><dt>CPU</dt><dd>{{ asset.cpu or 'Not recorded' }}</dd></div><div><dt>Memory</dt><dd>{{ (asset.ram_gb|string) ~ ' GB' if asset.ram_gb else 'Not recorded' }}</dd></div><div><dt>IP address</dt><dd>{{ asset.ip_address }}</dd></div></dl>
+            </div>
+            <div class="detail-group">
+                <h2>Assignment</h2>
+                <dl><div><dt>Asset type</dt><dd>{{ asset.asset_type }}</dd></div><div><dt>Location</dt><dd>{{ asset.location }}</dd></div><div><dt>Assigned user</dt><dd>{{ asset.assigned_user or 'Unassigned' }}</dd></div><div><dt>Asset key</dt><dd class="key-value">{{ asset.asset_key }}</dd></div></dl>
+            </div>
+            <div class="detail-group">
+                <h2>Purchase & warranty</h2>
+                <dl><div><dt>Purchase date</dt><dd>{{ asset.purchase_date or 'Not recorded' }}</dd></div><div><dt>Warranty expiry</dt><dd>{{ asset.warranty_expiry or 'Not recorded' }}</dd></div></dl>
+            </div>
+            <div class="detail-group">
+                <h2>Notes</h2>
+                <p class="notes-content">{{ asset.notes or 'No notes recorded.' }}</p>
+            </div>
+        </section>
+        <section class="lifecycle-actions">
+            <div><h2>Asset lifecycle</h2><p>Decommission to retain the record, or permanently delete it.</p></div>
+            {% if asset.status != 'Decommissioned' %}<form method="post" action="{{ url_for('decommission_asset_view', asset_key=asset.asset_key) }}" onsubmit="return confirm('Mark this asset as decommissioned?');"><button class="button button-secondary" type="submit">Decommission</button></form>{% endif %}
+            <form method="post" action="{{ url_for('delete_asset_view', asset_key=asset.asset_key) }}" onsubmit="return confirm('Permanently delete this asset record? This cannot be undone.');"><button class="button button-danger" type="submit">Delete asset</button></form>
+        </section>
+    </main>
+</body>
+</html>

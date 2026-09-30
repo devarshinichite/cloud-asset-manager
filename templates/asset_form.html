@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ mode }} asset · Cloud Asset Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="page-shell form-shell">
+        <header class="topbar">
+            <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">C</span> Cloud Asset Manager</a>
+            <a class="text-link" href="{{ url_for('index') }}">← Back to register</a>
+        </header>
+        <section class="page-heading compact-heading">
+            <div>
+                <p class="eyebrow">ASSET RECORD</p>
+                <h1>{{ mode }} asset</h1>
+                <p class="subheading">Enter the inventory, ownership, and lifecycle details.</p>
+            </div>
+        </section>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}<div class="flash-list">{% for category, message in messages %}<p class="flash flash-{{ category }}">{{ message }}</p>{% endfor %}</div>{% endif %}
+        {% endwith %}
+        <form class="asset-form" method="post">
+            <section class="form-section">
+                <h2>Identification</h2>
+                <div class="form-grid">
+                    <label>Asset tag <span class="required">*</span><input name="asset_tag" maxlength="64" required value="{{ asset.asset_tag if asset else '' }}" placeholder="e.g. IT-WS-0042"></label>
+                    <label>Hostname <span class="required">*</span><input name="hostname" maxlength="255" required value="{{ asset.hostname if asset else '' }}" placeholder="e.g. design-mbp-04"></label>
+                    <label>IP address <span class="required">*</span><input name="ip_address" maxlength="45" required value="{{ asset.ip_address if asset else '' }}" placeholder="IPv4 or IPv6"></label>
+                    <label>Asset type <span class="required">*</span><input name="asset_type" maxlength="80" required value="{{ asset.asset_type if asset else '' }}" placeholder="Laptop, server, network device..."></label>
+                    <label>Operating system <span class="required">*</span><input name="operating_system" maxlength="120" required value="{{ asset.operating_system if asset else '' }}" placeholder="e.g. Ubuntu 24.04 LTS"></label>
+                    <label>Location <span class="required">*</span><input name="location" maxlength="160" required value="{{ asset.location if asset else '' }}" placeholder="Office, region, or data center"></label>
+                </div>
+            </section>
+            <section class="form-section">
+                <h2>Specifications & ownership</h2>
+                <div class="form-grid">
+                    <label>CPU<input name="cpu" maxlength="120" value="{{ asset.cpu if asset and asset.cpu else '' }}" placeholder="e.g. 8-core Apple M3"></label>
+                    <label>Memory (GB)<input name="ram_gb" type="number" min="0" step="0.01" value="{{ asset.ram_gb if asset and asset.ram_gb is not none else '' }}" placeholder="16"></label>
+                    <label>Assigned user<input name="assigned_user" maxlength="160" value="{{ asset.assigned_user if asset and asset.assigned_user else '' }}" placeholder="Name or team"></label>
+                    <label>Status<select name="status">{% for value in ['Active', 'In repair', 'Retired', 'Decommissioned'] %}<option value="{{ value }}" {{ 'selected' if asset and asset.status == value else ('selected' if not asset and value == 'Active' else '') }}>{{ value }}</option>{% endfor %}</select></label>
+                </div>
+            </section>
+            <section class="form-section">
+                <h2>Purchase & support</h2>
+                <div class="form-grid">
+                    <label>Purchase date<input name="purchase_date" type="date" value="{{ asset.purchase_date if asset and asset.purchase_date else '' }}"></label>
+                    <label>Warranty expiry<input name="warranty_expiry" type="date" value="{{ asset.warranty_expiry if asset and asset.warranty_expiry else '' }}"></label>
+                    <label class="full-width">Notes<textarea name="notes" rows="4" placeholder="Support details, configuration notes, or other context">{{ asset.notes if asset and asset.notes else '' }}</textarea></label>
+                </div>
+            </section>
+            <div class="form-actions"><a class="button button-quiet" href="{{ url_for('index') }}">Cancel</a><button class="button button-primary" type="submit">{{ mode }} asset</button></div>
+        </form>
+    </main>
+</body>
+</html>

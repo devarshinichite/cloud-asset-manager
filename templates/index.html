@@ -1,53 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>assets</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 700px;
-        }
-
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Asset register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
+    <main class="page-shell">
+        <header class="topbar">
+            <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">C</span> Cloud Asset Manager</a>
+            <a class="button button-primary" href="{{ url_for('create_asset_view') }}">+ Add asset</a>
+        </header>
 
-    <h1>assets</h1>
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">INVENTORY / HARDWARE</p>
+                <h1>Asset register</h1>
+                <p class="subheading">Track ownership, lifecycle, and support details across your fleet.</p>
+            </div>
+            <p class="result-count"><strong>{{ assets|length }}</strong> assets shown</p>
+        </section>
 
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Age</th>
-        </tr>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}<p class="flash flash-{{ category }}">{{ message }}</p>{% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-        {% for asset in asset %}
-        <tr>
-            <td>{{ asset.id }}</td>
-            <td>{{ asset.name }}</td>
-            <td>{{ asset.email }}</td>
-            <td>{{ asset.age }}</td>
-        </tr>
-        {% endfor %}
+        <form class="filter-bar" method="get" action="{{ url_for('index') }}">
+            <label class="search-field">
+                <span class="sr-only">Search assets</span>
+                <input type="search" name="search" value="{{ filters.search }}" placeholder="Search tag, hostname, IP, or user">
+            </label>
+            <label>
+                <span class="sr-only">Asset type</span>
+                <select name="asset_type">
+                    <option value="">All types</option>
+                    {% for value in filter_options.asset_type %}<option value="{{ value }}" {{ 'selected' if filters.asset_type == value else '' }}>{{ value }}</option>{% endfor %}
+                </select>
+            </label>
+            <label>
+                <span class="sr-only">Location</span>
+                <select name="location">
+                    <option value="">All locations</option>
+                    {% for value in filter_options.location %}<option value="{{ value }}" {{ 'selected' if filters.location == value else '' }}>{{ value }}</option>{% endfor %}
+                </select>
+            </label>
+            <label>
+                <span class="sr-only">Status</span>
+                <select name="status">
+                    <option value="">All statuses</option>
+                    {% for value in ['Active', 'In repair', 'Retired', 'Decommissioned'] %}<option value="{{ value }}" {{ 'selected' if filters.status == value else '' }}>{{ value }}</option>{% endfor %}
+                </select>
+            </label>
+            <button class="button button-secondary" type="submit">Filter</button>
+            {% if filters.search or filters.asset_type or filters.location or filters.status %}<a class="clear-link" href="{{ url_for('index') }}">Clear</a>{% endif %}
+        </form>
 
-    </table>
-
+        <section class="table-wrap" aria-label="Asset list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Network</th>
+                        <th>Platform</th>
+                        <th>Location / owner</th>
+                        <th>Status</th>
+                        <th><span class="sr-only">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td><a class="asset-name" href="{{ url_for('asset_details', asset_key=asset.asset_key) }}">{{ asset.hostname }}</a><span class="table-meta">{{ asset.asset_tag }} · {{ asset.asset_type }}</span></td>
+                        <td>{{ asset.ip_address }}</td>
+                        <td>{{ asset.operating_system }}<span class="table-meta">{{ asset.cpu or 'CPU not recorded' }}{% if asset.ram_gb %} · {{ asset.ram_gb }} GB RAM{% endif %}</span></td>
+                        <td>{{ asset.location }}<span class="table-meta">{{ asset.assigned_user or 'Unassigned' }}</span></td>
+                        <td><span class="status status-{{ asset.status|lower|replace(' ', '-') }}">{{ asset.status }}</span></td>
+                        <td><a class="row-link" href="{{ url_for('asset_details', asset_key=asset.asset_key) }}">View <span aria-hidden="true">→</span></a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td class="empty-state" colspan="6"><strong>No assets found</strong><span>Try a different search or add an asset to the register.</span></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        <footer class="page-footer">Asset records are identified by a unique asset tag and stable asset key.</footer>
+    </main>
 </body>
 </html>
