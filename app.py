@@ -20,7 +20,7 @@ from db import (
 load_dotenv()
 
 app = Flask(__name__)
-#app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "cloud-asset-manager-dev-key")
+app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "cloud-asset-manager-dev-key")
 VALID_STATUSES = {"Active", "In repair", "Retired", "Decommissioned"}
 
 
