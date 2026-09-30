@@ -20,7 +20,7 @@ from db import (
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "cloud-asset-manager-dev-key")
+app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY")
 VALID_STATUSES = {"Active", "In repair", "Retired", "Decommissioned"}
 
 
@@ -157,4 +157,4 @@ initialize_database()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="localhost", port=5000, debug=True)

@@ -15,7 +15,7 @@
 
         <section class="page-heading">
             <div>
-                <p class="eyebrow">INVENTORY / HARDWARE</p>
+                <p class="eyebrow">INVENTORY / HARDWARE / SOFTWARE</p>
                 <h1>Asset register</h1>
                 <p class="subheading">Track ownership, lifecycle, and support details across your fleet.</p>
             </div>
@@ -52,7 +52,7 @@
             <label>
                 <span class="sr-only">Status</span>
                 <select name="status">
-                    <option value="">All statuses</option>
+                    <option value="">All status</option>
                     {% for value in ['Active', 'In repair', 'Retired', 'Decommissioned'] %}<option value="{{ value }}" {{ 'selected' if filters.status == value else '' }}>{{ value }}</option>{% endfor %}
                 </select>
             </label>
