@@ -1,9 +1,7 @@
-import os
 from datetime import date
 from decimal import Decimal, InvalidOperation
-
+from config import settings
 import mysql.connector
-from dotenv import load_dotenv
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
 from db import (
@@ -15,14 +13,16 @@ from db import (
     get_filter_options,
     initialize_database,
     update_asset,
+    wait_db,
 )
 
-load_dotenv()
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY")
+app.config["SECRET_KEY"] = settings.FLASK_SECRET_KEY
 VALID_STATUSES = {"Active", "In repair", "Retired", "Decommissioned"}
 
+wait_db()
+initialize_database()
 
 def form_values():
     return {
@@ -153,7 +153,7 @@ def delete_asset_view(asset_key):
     return redirect(url_for("index"))
 
 
-initialize_database()
+
 
 
 if __name__ == "__main__":

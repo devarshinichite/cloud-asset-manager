@@ -1,10 +1,7 @@
-import os
+import sys
 import uuid
-
+from config import settings
 import mysql.connector
-from dotenv import load_dotenv
-
-load_dotenv()
 
 ASSET_FIELDS = (
     "asset_tag",
@@ -25,13 +22,24 @@ ASSET_FIELDS = (
 
 def get_db_connection():
     return mysql.connector.connect(
-        host=os.environ.get("DB_HOST"),
-        port=int(os.getenv("DB_PORT", "3306")),
-        user=os.environ.get("DB_USER"),
-        password=os.environ.get("DB_PASSWORD"),
-        database=os.environ.get("DB_NAME"),
+        host=settings.DB_HOST,
+        port=int(settings.DB_PORT),
+        user=settings.DB_USER,
+        password=settings.DB_PASSWORD,
+        database=settings.DB_NAME,
     )
 
+# added new wait_db to check connection between DB instance.
+def wait_db():
+    print("Checking for DB connection, Please wait")
+    try:
+        connection = get_db_connection()
+        connection.close()
+        print("DB established connection, Your DB is up and running...\n Bye..")
+    except mysql.connector.Error as e:
+        print(f"Database connection failed: {e}")
+        print("Exiting so systemd can restart this instance in 30 seconds...")
+        sys.exit(1)
 
 def initialize_database():
     connection = get_db_connection()
