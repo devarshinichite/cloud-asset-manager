@@ -11,10 +11,10 @@ class Config:
     """Central configuration resolver for Flask and Database setups."""
     
     # 1. Determine environment (default to development if not explicitly set)
-    FLASK_ENV = os.getenv('FLASK_ENV', 'development')
+    APP_ENV = os.getenv('FLASK_ENV', 'development')
     
     def __init__(self):
-        if self.FLASK_ENV == 'production':
+        if self.APP_ENV == 'production':
             # Run production mode: Pull completely from memory using AWS Secrets Manager
             self._secrets = self._fetch_aws_secrets()
         else:
