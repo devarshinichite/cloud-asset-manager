@@ -1,110 +1,70 @@
 # Cloud Asset Manager
 
-Cloud Asset Manager is a Python/Flask application for organizing and managing cloud asset records.
+Cloud Asset Manager is a Flask application for managing cloud asset records. It stores application data in an RDS database and runs on an EC2 instance.
 
-## Overview
+## Architecture
 
-- Manage cloud asset records.
-- Store data in a relational database.
-- Expose functionality through a Flask web application.
-- Use environment-based configuration for local and deployment settings.
+- **EC2:** Hosts the Flask application, served by Gunicorn and Nginx.
+- **RDS:** Stores application data.
+- **AWS Secrets Manager:** Stores the Flask secret key and RDS credentials.
+- **IAM role:** Allows the EC2 instance to retrieve the required secrets using least-privilege permissions.
+- **`config.py`:** Centralizes application configuration.
 
-## Tech stack
-
-This project uses Python and Flask, with dependencies managed through pip/requirements files (or the repository's actual Python dependency manifest).
-
-Typical project stack for this repository:
+## Requirements
 
 - Python 3
-- Flask
-- SQLAlchemy or a project-specific database layer
-- A relational database such as PostgreSQL or SQLite for local development
-- Flask extensions or helpers as used by the app
-- pytest for tests
+- pip and `venv`
+- The dependencies listed in `requirements.txt`
+- For local development, the configuration and database access required by the application
 
-## Getting started
+## Local development
 
-### Prerequisites
+1. Clone the repository and enter the project directory.
+2. Create and activate a virtual environment, then install dependencies:
 
-- Python 3.x
-- pip
-- A virtual environment tool such as `venv`
-- A local database or configured cloud database connection, depending on how the app is set up
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-### Local setup
+3. Configure the values required by the application. Refer to `config.py` for the exact settings and supported configuration sources. Do not commit credentials or secret values.
+4. Start the development server:
 
-1. Clone the repository.
-2. Create and activate a virtual environment.
-3. Install Python dependencies from the project requirements file.
+   ```bash
+   flask run
+   ```
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows use .venv\Scripts\activate
-pip install -r requirements.txt
-```
+Use the application's configured Flask entry point if `flask run` does not discover it automatically.
 
-4. Create a local environment file (for example, `.env`) with the configuration values the app expects.
-5. Run the Flask development server.
+## Configuration and secrets
 
-```bash
-flask run
-```
+`config.py` is the central place to review how the application loads its settings. Use the configuration names and sources defined there rather than assuming variable names.
 
-If the app uses a custom startup command, use the command defined in the project instead of assuming a generic toolchain.
+In the AWS deployment, the Flask secret key and RDS credentials are stored in Secrets Manager. The EC2 instance accesses them through its attached IAM role. Do not put long-lived AWS credentials or secret values in source code.
 
-## Configuration
+## Tests
 
-Store configuration in environment variables or a `.env` file. Do not hard-code secrets.
-
-Common variables may include:
-
-| Variable | Description |
-|---|---|
-| `FLASK_SECRET` | Flask secret key |
-| `DB_HOST` | Database host |
-| `DB_PORT` | Database port |
-| `DB_NAME` | Database name |
-| `DB_USER` | Database username |
-| `DB_PASSWORD` | Database password |
-
-Use the exact variable names defined by the project. Do not add Node/npm-specific configuration unless the app actually uses it.
-
-## Development workflow
-
-1. Create a feature branch.
-2. Install dependencies in a virtual environment.
-3. Implement the Flask route, service, and data-layer changes.
-4. Run the project's Python tests and linting commands.
-5. Verify the app locally before opening a pull request.
-
-Typical commands may include:
+Run the project tests, if present, from the repository root:
 
 ```bash
 pytest
-flask --app app run
 ```
 
-Use the repository's actual scripts and commands rather than assuming a JavaScript toolchain.
+## Deployment overview
 
-## Application design
+The deployed request path is:
 
-This application follows a standard Flask server structure, typically with separation between:
+1. Nginx receives the request and forwards it to Gunicorn.
+2. Gunicorn serves the Flask application.
+3. Database-backed requests connect to RDS.
+4. The application retrieves required secrets from Secrets Manager using the EC2 instance role.
 
-- Routes/controllers: HTTP endpoints and request handling
-- Services/business logic: validation and domain logic
-- Data access layer: database queries and persistence
-- Templates/static files: UI rendering and frontend assets if applicable
-
-The application should validate user input on the server side, never trust client-side data as the only protection, and use parameterized database queries.
-
-## Deployment
-
-Deployment should use the environment and infrastructure actually configured for this repository. If the app is hosted in AWS, use the project's approved deployment configuration, IAM roles, and secrets management.
+The `flask-app.service` systemd unit manages the application service. Confirm its environment, working directory, startup command, and restart settings, CPU and memory limit when deploying or troubleshooting. See [the troubleshooting guide](docs/TROUBLESHOOTING.md) for service, Nginx, database, and secrets-access checks.
 
 ## Security
 
-- Use environment variables or a managed secret store for credentials.
-- Keep database credentials out of source control.
-- Enforce HTTPS in production.
-- Validate inputs and protect against common web vulnerabilities.
-- Use least-privilege access for database and cloud resources.
+- Keep database credentials and the Flask secret key out of source control.
+- Grant the EC2 IAM role only the permissions needed to retrieve the application’s specific secrets.
+- Restrict EC2 and RDS network access to the required ports and sources.
+- Validate user input on the server and use safe, parameterized database operations.
