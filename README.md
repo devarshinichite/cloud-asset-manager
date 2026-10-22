@@ -68,3 +68,9 @@ The `flask-app.service` systemd unit manages the application service. Confirm it
 - Grant the EC2 IAM role only the permissions needed to retrieve the application’s specific secrets.
 - Restrict EC2 and RDS network access to the required ports and sources.
 - Validate user input on the server and use safe, parameterized database operations.
+
+## HLD & LLD 
+
+Refer 
+[HLD](https://github.com/devarshinichite/cloud-asset-manager/blob/master/High-Level%20Design%20Cloud%20Asset%20Manager%20on%20AWS.md)
+[LLD](https://github.com/devarshinichite/cloud-asset-manager/blob/master/Low-Level%20Design%20Cloud%20Asset%20Manager.md)
